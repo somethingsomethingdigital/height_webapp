@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "vite",
-    "server": "node server.js",
+    "server": "node --env-file=.env server.js",
     "build": "vite build",
     "preview": "vite preview"
   },
