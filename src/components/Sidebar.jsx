@@ -1,6 +1,6 @@
 import './Sidebar.css';
 
-export default function Sidebar({ activeView, onNavigate }) {
+export default function Sidebar({ activeView, onNavigate, onLogout }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -23,6 +23,12 @@ export default function Sidebar({ activeView, onNavigate }) {
           <span>AI Chat</span>
         </button>
       </nav>
+      <div className="sidebar-footer">
+        <button className="logout-btn" onClick={onLogout}>
+          <span className="nav-icon">↩</span>
+          <span>Sign out</span>
+        </button>
+      </div>
     </aside>
   );
 }
