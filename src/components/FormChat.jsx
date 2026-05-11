@@ -300,23 +300,9 @@ export default function FormChat() {
   };
 
   const startFlow = () => {
-    pushText(
-      "Kia ora. 👋🏾 I'm your friendly AI prompt generator. Select the task you'd like a standard prompt for.",
-      () => push({ type: 'opts', tag: 'intro', options: ['Bid Writing', 'Something Else'] })
-    );
+    pushText("Let's start with the bid's main details.", () => push({ type: 'form1' }));
   };
   startFlowFn.current = startFlow;
-
-  const handleIntroSelect = choice => {
-    setLocked(m => m.tag === 'intro');
-    if (choice === 'Bid Writing') {
-      pushText("Ok, sure. Let's start with the bid's main details.", () => push({ type: 'form1' }));
-    } else {
-      pushText("Thanks for stopping by. We'll have more options available soon. 👋🏾", () =>
-        push({ type: 'ended' })
-      );
-    }
-  };
 
   const handleRestartSelect = choice => {
     setLocked(m => m.tag === 'restart');
@@ -346,7 +332,7 @@ export default function FormChat() {
             <div className="fc-opts">
               {msg.options.map(o => (
                 <button key={o} className="fc-opt-btn" disabled={msg.locked}
-                  onClick={() => msg.tag === 'intro' ? handleIntroSelect(o) : handleRestartSelect(o)}>
+                  onClick={() => handleRestartSelect(o)}>
                   {o}
                 </button>
               ))}
