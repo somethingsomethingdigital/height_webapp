@@ -1,14 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
 import './Chat.css';
 
-const SYSTEM_PROMPT = 'You are a helpful, knowledgeable, and friendly AI assistant. Answer questions clearly and concisely.';
+const SYSTEM_PROMPT = 'You are a helpful, knowledgeable, and friendly AI assistant. Answer questions clearly and concisely. When files are provided, answer questions about their contents.';
 
-function Message({ msg }) {
-  return (
-    <div className={`message ${msg.role}`}>
-      <div className="message-bubble" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-    </div>
-  );
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+const MAX_SIZE = 10 * 1024 * 1024;
+
+function fileIcon(mimeType) {
+  if (mimeType === 'application/pdf') return '📄';
+  if (IMAGE_TYPES.has(mimeType)) return '🖼️';
+  return '📎';
+}
+
+function readFileData(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    if (file.type === 'application/pdf' || IMAGE_TYPES.has(file.type)) {
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = () => resolve(reader.result);
+      reader.readAsText(file);
+    }
+    reader.onerror = reject;
+  });
 }
 
 function renderMarkdown(text) {
@@ -19,25 +34,86 @@ function renderMarkdown(text) {
     .replace(/\n/g, '<br/>');
 }
 
-export default function AIChat() {
+function Message({ msg }) {
+  return (
+    <div className={`message ${msg.role}`}>
+      <div className="message-bubble">
+        {msg.files?.length > 0 && (
+          <div className="file-chips">
+            {msg.files.map((f, i) => (
+              <div key={i} className="file-chip">
+                <span>{fileIcon(f.mimeType)}</span>
+                <span className="file-chip-name">{f.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+      </div>
+    </div>
+  );
+}
+
+export default function AIChat({ token, onUnauthorized }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [fileError, setFileError] = useState('');
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    e.target.value = '';
+    if (!files.length) return;
+
+    const oversized = files.find(f => f.size > MAX_SIZE);
+    if (oversized) {
+      setFileError(`${oversized.name} is too large (max 10MB per file)`);
+      return;
+    }
+    setFileError('');
+
+    try {
+      const loaded = await Promise.all(
+        files.map(async f => ({
+          name: f.name,
+          mimeType: f.type || 'text/plain',
+          data: await readFileData(f),
+        }))
+      );
+      setAttachments(prev => [...prev, ...loaded]);
+    } catch {
+      setFileError('Could not read one or more files');
+    }
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
   const sendMessage = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if ((!text && !attachments.length) || loading) return;
 
-    const userMsg = { role: 'user', content: text };
+    const files = attachments;
+    const content = text || 'Please analyze the contents of these files.';
+    const userMsg = {
+      role: 'user',
+      content,
+      files: files.length ? files.map(f => ({ name: f.name, mimeType: f.mimeType })) : undefined,
+    };
     const newMessages = [...messages, userMsg];
+
     setMessages(newMessages);
     setInput('');
+    setAttachments([]);
     setLoading(true);
 
     const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
@@ -45,15 +121,26 @@ export default function AIChat() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages, system: SYSTEM_PROMPT }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          messages: apiMessages,
+          system: SYSTEM_PROMPT,
+          files: files.length ? files : undefined,
+        }),
       });
+
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let assistantText = '';
-      const assistantMsg = { role: 'assistant', content: '' };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -77,7 +164,7 @@ export default function AIChat() {
           } catch {}
         }
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
     } finally {
       setLoading(false);
@@ -95,29 +182,24 @@ export default function AIChat() {
   const clearChat = () => {
     setMessages([]);
     setInput('');
+    setAttachments([]);
+    setFileError('');
     inputRef.current?.focus();
   };
 
   return (
     <div className="chat-container">
-      <header className="chat-header">
-        <div className="chat-header-info">
-          <div className="chat-avatar ai-avatar">🤖</div>
-          <div>
-            <div className="chat-title">AI Assistant</div>
-            <div className="chat-subtitle">Ask me anything</div>
-          </div>
+      {messages.length > 0 && (
+        <div className="chat-topbar">
+          <button className="reset-btn" onClick={clearChat}>New chat</button>
         </div>
-        {messages.length > 0 && (
-          <button className="reset-btn" onClick={clearChat}>Clear</button>
-        )}
-      </header>
+      )}
 
       <div className="messages">
         {messages.length === 0 && (
           <div className="empty-state">
-            <div className="empty-icon">💬</div>
-            <p>Start a conversation! Ask me anything.</p>
+            <div className="empty-heading">How can I help you today?</div>
+            <p>Ask anything, or attach a file to get started.</p>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -125,7 +207,7 @@ export default function AIChat() {
         ))}
         {loading && (
           <div className="message assistant">
-            <div className="message-bubble typing">
+            <div className="message-bubble typing-bubble">
               <span /><span /><span />
             </div>
           </div>
@@ -134,23 +216,62 @@ export default function AIChat() {
       </div>
 
       <div className="chat-input-area">
-        <textarea
-          ref={inputRef}
-          className="chat-input"
-          placeholder="Ask me anything… (Enter to send)"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          disabled={loading}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+          accept=".txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.pdf,image/*"
         />
-        <button
-          className="send-btn"
-          onClick={sendMessage}
-          disabled={!input.trim() || loading}
-        >
-          ➤
-        </button>
+
+        {(attachments.length > 0 || fileError) && (
+          <div className="attachment-row">
+            {attachments.map((f, i) => (
+              <div key={i} className="attachment-preview">
+                <span>{fileIcon(f.mimeType)}</span>
+                <span className="attachment-name">{f.name}</span>
+                <button className="remove-attachment" onClick={() => removeAttachment(i)}>×</button>
+              </div>
+            ))}
+            {fileError && <span className="file-error">{fileError}</span>}
+          </div>
+        )}
+
+        <div className="input-box">
+          <button
+            className="attach-btn"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            title="Attach files"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <textarea
+            ref={inputRef}
+            className="chat-input"
+            placeholder=""
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            disabled={loading}
+          />
+          <button
+            className="send-btn"
+            onClick={sendMessage}
+            disabled={(!input.trim() && !attachments.length) || loading}
+          >
+            ↑
+          </button>
+        </div>
+        <p className="input-hint">AI can make mistakes. Checking important information.</p>
+      </div>
+      <div className="fc-powered-footer">
+        <span>Powered by <a href="https://www.somethingsomething.digital" target="_blank" rel="noopener">Something Something Digital</a></span>
       </div>
     </div>
   );
