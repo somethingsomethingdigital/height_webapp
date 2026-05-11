@@ -25,7 +25,7 @@
 
 .login-logo-icon {
   font-size: 24px;
-  color: #7c6af7;
+  color: #19c37d;
 }
 
 .login-logo-text {
@@ -70,7 +70,7 @@
 }
 
 .login-field input:focus {
-  border-color: #7c6af7;
+  border-color: #0d0d0d;
 }
 
 .login-error {
@@ -82,7 +82,7 @@
 .login-btn {
   margin-top: 4px;
   padding: 11px;
-  background: #7c6af7;
+  background: #0d0d0d;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -94,7 +94,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  background: #6a59e8;
+  background: #1a1a1a;
 }
 
 .login-btn:disabled {

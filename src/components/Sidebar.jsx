@@ -13,7 +13,7 @@ export default function Sidebar({ activeView, onNavigate, onLogout }) {
           onClick={() => onNavigate('form')}
         >
           <span className="nav-icon">📋</span>
-          <span>Form</span>
+          <span>Bid Writing Prompt</span>
         </button>
         <button
           className={`nav-btn ${activeView === 'ai' ? 'active' : ''}`}

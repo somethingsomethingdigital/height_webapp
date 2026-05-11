@@ -189,24 +189,17 @@ export default function AIChat({ token, onUnauthorized }) {
 
   return (
     <div className="chat-container">
-      <header className="chat-header">
-        <div className="chat-header-info">
-          <div className="chat-avatar ai-avatar">🤖</div>
-          <div>
-            <div className="chat-title">AI Assistant</div>
-            <div className="chat-subtitle">Ask me anything</div>
-          </div>
+      {messages.length > 0 && (
+        <div className="chat-topbar">
+          <button className="reset-btn" onClick={clearChat}>New chat</button>
         </div>
-        {messages.length > 0 && (
-          <button className="reset-btn" onClick={clearChat}>Clear</button>
-        )}
-      </header>
+      )}
 
       <div className="messages">
         {messages.length === 0 && (
           <div className="empty-state">
-            <div className="empty-icon">💬</div>
-            <p>Start a conversation or attach files to ask questions about them.</p>
+            <div className="empty-heading">How can I help you today?</div>
+            <p>Ask anything, or attach a file to get started.</p>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -214,7 +207,7 @@ export default function AIChat({ token, onUnauthorized }) {
         ))}
         {loading && (
           <div className="message assistant">
-            <div className="message-bubble typing">
+            <div className="message-bubble typing-bubble">
               <span /><span /><span />
             </div>
           </div>
@@ -231,6 +224,7 @@ export default function AIChat({ token, onUnauthorized }) {
           onChange={handleFileChange}
           accept=".txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.pdf,image/*"
         />
+
         {(attachments.length > 0 || fileError) && (
           <div className="attachment-row">
             {attachments.map((f, i) => (
@@ -243,7 +237,8 @@ export default function AIChat({ token, onUnauthorized }) {
             {fileError && <span className="file-error">{fileError}</span>}
           </div>
         )}
-        <div className="input-row">
+
+        <div className="input-box">
           <button
             className="attach-btn"
             onClick={() => fileInputRef.current?.click()}
@@ -255,7 +250,7 @@ export default function AIChat({ token, onUnauthorized }) {
           <textarea
             ref={inputRef}
             className="chat-input"
-            placeholder="Ask me anything… (Enter to send)"
+            placeholder="Message ChatApp…"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -267,9 +262,10 @@ export default function AIChat({ token, onUnauthorized }) {
             onClick={sendMessage}
             disabled={(!input.trim() && !attachments.length) || loading}
           >
-            ➤
+            ↑
           </button>
         </div>
+        <p className="input-hint">ChatApp can make mistakes. Consider checking important information.</p>
       </div>
     </div>
   );

@@ -1,169 +1,142 @@
 import { useState, useRef, useEffect } from 'react';
-import './Chat.css';
+import './FormCard.css';
 
-const SYSTEM_PROMPT = `You are a friendly form assistant. Your job is to collect three pieces of information from the user: first name, last name, and email address.
-
-Guide the conversation naturally:
-1. Start by greeting the user and asking for their first name.
-2. Once you have their first name, ask for their last name.
-3. Once you have their last name, ask for their email address.
-4. Once you have all three, present a summary and confirm the details look correct.
-5. If the user confirms, thank them and let them know the form has been submitted.
-
-Keep responses short and friendly. If the user provides multiple pieces of info at once, acknowledge them all and ask for whatever is still missing.`;
-
-const INITIAL_MESSAGE = {
-  role: 'assistant',
-  content: "Hi there! I'll help you fill out a quick form. To get started, could you tell me your **first name**?",
-};
-
-function Message({ msg }) {
-  return (
-    <div className={`message ${msg.role}`}>
-      <div className="message-bubble" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-    </div>
-  );
-}
-
-function renderMarkdown(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n/g, '<br/>');
-}
+const STEPS = [
+  { field: 'firstName', label: 'First name',    placeholder: 'e.g. Jane',            type: 'text'  },
+  { field: 'lastName',  label: 'Last name',     placeholder: 'e.g. Smith',           type: 'text'  },
+  { field: 'email',     label: 'Email address', placeholder: 'e.g. jane@example.com', type: 'email' },
+];
 
 export default function FormChat() {
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+  const [values, setValues] = useState({ firstName: '', lastName: '', email: '' });
   const [submitted, setSubmitted] = useState(false);
-  const bottomRef = useRef(null);
+  const [error, setError] = useState('');
   const inputRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    inputRef.current?.focus();
+  }, [step]);
 
-  const sendMessage = async () => {
-    const text = input.trim();
-    if (!text || loading) return;
+  const current = STEPS[step];
 
-    const userMsg = { role: 'user', content: text };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput('');
-    setLoading(true);
-
-    const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages, system: SYSTEM_PROMPT }),
-      });
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let assistantText = '';
-      const assistantMsg = { role: 'assistant', content: '' };
-      setMessages(prev => [...prev, assistantMsg]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const lines = decoder.decode(value).split('\n');
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6);
-          if (data === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) {
-              assistantText += parsed.text;
-              setMessages(prev => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { role: 'assistant', content: assistantText };
-                return updated;
-              });
-            }
-          } catch {}
-        }
-      }
-
-      if (assistantText.toLowerCase().includes('submitted') || assistantText.toLowerCase().includes('thank you')) {
-        setSubmitted(true);
-      }
-    } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
-    } finally {
-      setLoading(false);
-      inputRef.current?.focus();
+  const validate = () => {
+    const val = values[current.field].trim();
+    if (!val) return 'This field is required.';
+    if (current.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      return 'Please enter a valid email address.';
     }
+    return '';
+  };
+
+  const handleNext = () => {
+    const err = validate();
+    if (err) { setError(err); return; }
+    setError('');
+    setStep(s => s + 1);
+  };
+
+  const handleBack = () => {
+    setError('');
+    setStep(s => s - 1);
+  };
+
+  const handleChange = (e) => {
+    setError('');
+    setValues(v => ({ ...v, [current.field]: e.target.value }));
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); handleNext(); }
   };
 
-  const reset = () => {
-    setMessages([INITIAL_MESSAGE]);
+  const handleSubmit = () => setSubmitted(true);
+
+  const handleReset = () => {
+    setStep(0);
+    setValues({ firstName: '', lastName: '', email: '' });
     setSubmitted(false);
-    setInput('');
-    inputRef.current?.focus();
+    setError('');
   };
 
-  return (
-    <div className="chat-container">
-      <header className="chat-header">
-        <div className="chat-header-info">
-          <div className="chat-avatar form-avatar">📋</div>
-          <div>
-            <div className="chat-title">Form Assistant</div>
-            <div className="chat-subtitle">I'll collect your details</div>
+  if (submitted) {
+    return (
+      <div className="form-page">
+        <div className="form-card success-card">
+          <div className="success-icon">✓</div>
+          <h2>All done!</h2>
+          <p>Thanks, <strong>{values.firstName}</strong>. Your details have been submitted.</p>
+          <button className="form-btn" onClick={handleReset}>Start over</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Review step
+  if (step === STEPS.length) {
+    return (
+      <div className="form-page">
+        <div className="form-card">
+          <div className="form-progress">
+            <span className="form-step-label">Review your details</span>
+          </div>
+          <h2 className="form-question">Does everything look right?</h2>
+          <dl className="review-list">
+            {STEPS.map(s => (
+              <div key={s.field} className="review-row">
+                <dt>{s.label}</dt>
+                <dd>{values[s.field]}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="form-actions">
+            <button className="form-btn-secondary" onClick={handleBack}>Back</button>
+            <button className="form-btn" onClick={handleSubmit}>Submit</button>
           </div>
         </div>
-        {submitted && (
-          <button className="reset-btn" onClick={reset}>Start Over</button>
-        )}
-      </header>
-
-      <div className="messages">
-        {messages.map((msg, i) => (
-          <Message key={i} msg={msg} />
-        ))}
-        {loading && (
-          <div className="message assistant">
-            <div className="message-bubble typing">
-              <span /><span /><span />
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
       </div>
+    );
+  }
 
-      <div className="chat-input-area">
-        <textarea
+  // Question card
+  return (
+    <div className="form-page">
+      <div className="form-card">
+        <div className="form-progress">
+          <div className="form-dots">
+            {STEPS.map((_, i) => (
+              <span key={i} className={`form-dot ${i === step ? 'active' : i < step ? 'done' : ''}`} />
+            ))}
+          </div>
+          <span className="form-step-label">Step {step + 1} of {STEPS.length}</span>
+        </div>
+
+        <label className="form-question" htmlFor="form-input">
+          {current.label}
+        </label>
+
+        <input
           ref={inputRef}
-          className="chat-input"
-          placeholder={submitted ? 'Form submitted!' : 'Type your response…'}
-          value={input}
-          onChange={e => setInput(e.target.value)}
+          id="form-input"
+          className={`form-input ${error ? 'form-input-error' : ''}`}
+          type={current.type}
+          placeholder={current.placeholder}
+          value={values[current.field]}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
-          rows={1}
-          disabled={submitted || loading}
+          autoComplete={current.field === 'email' ? 'email' : 'off'}
         />
-        <button
-          className="send-btn"
-          onClick={sendMessage}
-          disabled={!input.trim() || loading || submitted}
-        >
-          ➤
-        </button>
+
+        {error && <p className="form-error">{error}</p>}
+
+        <div className="form-actions">
+          {step > 0 && (
+            <button className="form-btn-secondary" onClick={handleBack}>Back</button>
+          )}
+          <button className="form-btn" onClick={handleNext}>
+            {step === STEPS.length - 1 ? 'Review' : 'Next'}
+          </button>
+        </div>
       </div>
     </div>
   );
