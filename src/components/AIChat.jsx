@@ -39,12 +39,12 @@ function WandButton({ text, onSend }) {
   const handle = () => {
     if (active) return;
     setActive(true);
-    onSend(`Please rewrite the following response in the style of Shakespearean English (ye olde English):\n\n${text}`);
+    onSend(`Rewrite the response in the style of Shakespearean English (ye olde English):\n\n${text}`);
     setTimeout(() => setActive(false), 1800);
   };
   return (
     <button className={`msg-wand-btn${active ? ' active' : ''}`} onClick={handle} title="Rewrite in Shakespearean English">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/>
         <path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/>
         <path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>
@@ -64,8 +64,8 @@ function CopyButton({ text }) {
   return (
     <button className="msg-copy-btn" onClick={copy} title="Copy to clipboard">
       {copied
-        ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       }
     </button>
   );
