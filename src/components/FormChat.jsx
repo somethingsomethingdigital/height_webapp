@@ -162,6 +162,22 @@ function ResultBox({ text }) {
   );
 }
 
+function BotMsg({ children }) {
+  return (
+    <div className="message assistant">
+      <div className="message-bubble">{children}</div>
+    </div>
+  );
+}
+
+function CardMsg({ children }) {
+  return (
+    <div className="message assistant">
+      <div className="fc-form-card">{children}</div>
+    </div>
+  );
+}
+
 export default function FormChat() {
   const [messages, setMessages] = useState([]);
   const bottomRef = useRef(null);
@@ -313,18 +329,6 @@ export default function FormChat() {
   };
 
   useEffect(() => { setTimeout(() => startFlowFn.current(), 500); }, []);
-
-  const BotMsg = ({ children }) => (
-    <div className="message assistant">
-      <div className="message-bubble">{children}</div>
-    </div>
-  );
-
-  const CardMsg = ({ children }) => (
-    <div className="message assistant">
-      <div className="fc-form-card">{children}</div>
-    </div>
-  );
 
   const renderMsg = msg => {
     switch (msg.type) {
