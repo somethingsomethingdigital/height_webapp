@@ -253,7 +253,7 @@ export default function AIChat({ token, onUnauthorized }) {
           <textarea
             ref={inputRef}
             className="chat-input"
-            placeholder="Message Height AI…"
+            placeholder=""
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -148,6 +148,13 @@
   opacity: 0;
 }
 
+.fc-form-row {
+  display: flex;
+  flex-direction: column;
+  animation: fcFadeUp 0.2s ease forwards;
+  opacity: 0;
+}
+
 @keyframes fcFadeUp {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0); }

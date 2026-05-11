@@ -41,6 +41,14 @@ function BotRow({ children }) {
   );
 }
 
+function FormRow({ children }) {
+  return (
+    <div className="fc-form-row">
+      {children}
+    </div>
+  );
+}
+
 function TypeBubble({ text }) {
   const [shown, setShown] = useState('');
   const [done, setDone] = useState(false);
@@ -398,14 +406,14 @@ export default function FormChat() {
         );
 
       case 'form1':
-        return <BotRow key={msg.id}><Form1 onSubmit={handleForm1Submit} disabled={msg.locked} /></BotRow>;
+        return <FormRow key={msg.id}><Form1 onSubmit={handleForm1Submit} disabled={msg.locked} /></FormRow>;
 
       case 'form2':
-        return <BotRow key={msg.id}><Form2 onSubmit={handleForm2Submit} disabled={msg.locked} /></BotRow>;
+        return <FormRow key={msg.id}><Form2 onSubmit={handleForm2Submit} disabled={msg.locked} /></FormRow>;
 
       case 'file':
         return (
-          <BotRow key={msg.id}>
+          <FormRow key={msg.id}>
             <FileStep
               stepDef={FILE_STEPS[msg.idx]}
               index={msg.idx}
@@ -414,14 +422,14 @@ export default function FormChat() {
               onSkip={() => handleFileSkip(msg.key)}
               disabled={msg.locked}
             />
-          </BotRow>
+          </FormRow>
         );
 
       case 'submit-btn':
         return (
-          <BotRow key={msg.id}>
+          <FormRow key={msg.id}>
             <button className="fc-next-btn" onClick={handleSubmit} disabled={msg.locked}>Submit</button>
-          </BotRow>
+          </FormRow>
         );
 
       case 'waiting':
@@ -429,10 +437,10 @@ export default function FormChat() {
 
       case 'result':
         return (
-          <BotRow key={msg.id}>
+          <FormRow key={msg.id}>
             <p className="fc-bubble" style={{ marginBottom: '0.5rem' }}>Here's your standard prompt</p>
             <ResultBox text={msg.text} />
-          </BotRow>
+          </FormRow>
         );
 
       case 'ended':
