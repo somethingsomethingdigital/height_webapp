@@ -5,7 +5,7 @@ export default function Sidebar({ activeView, onNavigate, onLogout }) {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <span className="logo-icon">◈</span>
-        <span className="logo-text">ChatApp</span>
+        <span className="logo-text">Height AI</span>
       </div>
       <nav className="sidebar-nav">
         <button

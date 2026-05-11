@@ -245,12 +245,15 @@ export default function AIChat({ token, onUnauthorized }) {
             disabled={loading}
             title="Attach files"
           >
-            📎
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
           </button>
           <textarea
             ref={inputRef}
             className="chat-input"
-            placeholder="Message ChatApp…"
+            placeholder="Message Height AI…"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -265,7 +268,7 @@ export default function AIChat({ token, onUnauthorized }) {
             ↑
           </button>
         </div>
-        <p className="input-hint">ChatApp can make mistakes. Consider checking important information.</p>
+        <p className="input-hint">Height AI can make mistakes. Consider checking important information.</p>
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ export default function Login({ onLogin }) {
       <div className="login-card">
         <div className="login-logo">
           <span className="login-logo-icon">◈</span>
-          <span className="login-logo-text">ChatApp</span>
+          <span className="login-logo-text">Height AI</span>
         </div>
         <h1 className="login-title">Sign in</h1>
         <form className="login-form" onSubmit={handleSubmit}>
