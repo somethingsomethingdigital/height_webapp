@@ -4,7 +4,7 @@ export default function Sidebar({ activeView, onNavigate, onLogout }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <span className="logo-icon">◈</span>
+        <img src="https://raw.githubusercontent.com/somethingsomethingdigital/height-assistant/a5a260e9786f142e55400c8db7804678295eea69/height_logo.png" alt="Height" className="logo-img" />
         <span className="logo-text">Height AI</span>
       </div>
       <nav className="sidebar-nav">

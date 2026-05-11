@@ -17,9 +17,12 @@
   color: #fff;
 }
 
-.logo-icon {
-  font-size: 20px;
-  color: #19c37d;
+.logo-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .logo-text {

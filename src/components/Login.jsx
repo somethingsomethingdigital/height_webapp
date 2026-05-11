@@ -39,7 +39,7 @@ export default function Login({ onLogin }) {
     <div className="login-page">
       <div className="login-card">
         <div className="login-logo">
-          <span className="login-logo-icon">◈</span>
+          <img src="https://raw.githubusercontent.com/somethingsomethingdigital/height-assistant/a5a260e9786f142e55400c8db7804678295eea69/height_logo.png" alt="Height" className="login-logo-img" />
           <span className="login-logo-text">Height AI</span>
         </div>
         <h1 className="login-title">Sign in</h1>

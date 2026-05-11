@@ -23,9 +23,12 @@
   margin-bottom: 28px;
 }
 
-.login-logo-icon {
-  font-size: 24px;
-  color: #19c37d;
+.login-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .login-logo-text {
