@@ -299,8 +299,8 @@ export default function AIChat({ token, onUnauthorized }) {
       <div className="messages">
         {messages.length === 0 && (
           <div className="empty-state">
-            <div className="empty-heading">How can I help you today?</div>
-            <p>Ask anything, or attach a file to get started.</p>
+            <div className="empty-heading">How can I help today?</div>
+            <p>Ask anything. Or attach a file to get started.</p>
           </div>
         )}
         {messages.map((msg, i) => (
