@@ -190,7 +190,14 @@ export default function FormChat() {
   const pushFileStepFn = useRef(null);
   const startFlowFn    = useRef(null);
 
-  useEffect(() => () => { mounted.current = false; }, []);
+  useEffect(() => {
+    mounted.current = true;
+    const t = setTimeout(() => startFlowFn.current?.(), 500);
+    return () => {
+      mounted.current = false;
+      clearTimeout(t);
+    };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -327,8 +334,6 @@ export default function FormChat() {
     setMessages([]);
     setTimeout(() => { if (mounted.current) startFlowFn.current(); }, 300);
   };
-
-  useEffect(() => { setTimeout(() => startFlowFn.current(), 500); }, []);
 
   const renderMsg = msg => {
     switch (msg.type) {
