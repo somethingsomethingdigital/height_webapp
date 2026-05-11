@@ -332,20 +332,18 @@
 }
 
 .msg-copy-btn {
-  background: #f4f4f4;
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
+  background: none;
+  border: none;
+  color: #9ca3af;
   cursor: pointer;
-  padding: 5px 7px;
-  border-radius: 6px;
+  padding: 2px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition: color 0.15s;
 }
 
 .msg-copy-btn:hover {
-  background: #ececec;
-  border-color: #d1d5db;
   color: #374151;
 }
 
