@@ -317,6 +317,32 @@
   text-align: center;
 }
 
+/* Message action row (copy button) */
+.msg-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.msg-copy-btn {
+  background: none;
+  border: none;
+  color: #c2c2c8;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.msg-copy-btn:hover {
+  color: #6b7280;
+  background: #f4f4f4;
+}
+
 /* ── Form chat (Bid Writing Prompt) ───────────────────────────────── */
 
 /* Typing cursor on bot text */
