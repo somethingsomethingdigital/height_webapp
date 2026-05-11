@@ -34,8 +34,8 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.75rem 1.25rem;
-  background: #499281;
-  border-bottom: none;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e2dd;
 }
 
 .fc-logo-wrap {
@@ -69,14 +69,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.85);
+  color: #9a9790;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .fc-restart-btn:hover {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
+  background: #f0ede8;
+  color: #1a1916;
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
@@ -138,6 +138,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
+  text-align: left;
 }
 
 .fc-row {
@@ -275,9 +276,12 @@
 }
 
 .fc-hint {
-  font-size: 0.78rem;
+  display: block;
+  font-size: 0.85rem;
   color: #9a9790;
-  font-weight: 300;
+  font-weight: 400;
+  margin-top: 0.2rem;
+  line-height: 1.45;
 }
 
 .fc-req {
@@ -301,9 +305,23 @@
 }
 
 .fc-form input[type="text"]:focus,
-.fc-form textarea:focus,
-.fc-form select:focus {
+.fc-form textarea:focus {
   border-color: #aaa9a5;
+}
+
+.fc-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9790' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+.fc-form select:focus {
+  border-color: #499281;
+  box-shadow: 0 0 0 3px rgba(73, 146, 129, 0.12);
 }
 
 .fc-form textarea {
@@ -379,10 +397,21 @@
   flex-shrink: 0;
 }
 
+.fc-drop-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .fc-drop-label {
   font-size: 0.83rem;
   color: #1a1916;
   font-weight: 500;
+}
+
+.fc-drop-sub {
+  font-size: 0.7rem;
+  color: #9a9790;
 }
 
 .fc-file-chosen {
@@ -422,12 +451,13 @@
   border: 1px solid #e4e2dd;
   border-radius: 10px;
   padding: 0.85rem 0.85rem 2.6rem;
+  margin-top: 0.4rem;
   position: relative;
 }
 
 .fc-result-text {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
   white-space: pre-wrap;
   color: #1a1916;
   line-height: 1.75;

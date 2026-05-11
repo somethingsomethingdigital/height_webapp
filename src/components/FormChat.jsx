@@ -111,30 +111,39 @@ function Form1({ onSubmit, disabled }) {
 
 function Form2({ onSubmit, disabled }) {
   const [v, setV] = useState({ nonPrice: '', sme: '', evalCriteria: '', englishVariant: '' });
-  const set = k => e => setV(p => ({ ...p, [k]: e.target.value }));
+  const [err, setErr] = useState('');
+  const set = k => e => { setV(p => ({ ...p, [k]: e.target.value })); setErr(''); };
+  const submit = () => {
+    if (!v.englishVariant) { setErr('Please select an English variant.'); return; }
+    onSubmit(v);
+  };
   return (
     <div className="fc-form">
       <div className="fc-field">
-        <label className="fc-label">What have you been tasked to support?<br/><span className="fc-hint">e.g., Executive Summary, Case Studies</span></label>
+        <label className="fc-label">What have you been tasked to support?</label>
+        <span className="fc-hint">e.g., Executive Summary, Case Studies. If drafting RE / TR / CVs only, specify those sections.</span>
         <textarea value={v.nonPrice} onChange={set('nonPrice')} disabled={disabled} />
       </div>
       <div className="fc-field">
-        <label className="fc-label">Subject matter expertise<br/><span className="fc-hint">e.g., Road maintenance, bridge engineer</span></label>
+        <label className="fc-label">Subject matter expertise</label>
+        <span className="fc-hint">e.g., Road maintenance, bridge engineer</span>
         <textarea value={v.sme} onChange={set('sme')} disabled={disabled} />
       </div>
       <div className="fc-field">
-        <label className="fc-label">Evaluation criteria<br/><span className="fc-hint">leave blank to use standard</span></label>
+        <label className="fc-label">Evaluation criteria</label>
+        <span className="fc-hint">Leave blank to use standard</span>
         <textarea value={v.evalCriteria} onChange={set('evalCriteria')} disabled={disabled} />
       </div>
       <div className="fc-field">
-        <label className="fc-label">English variant</label>
-        <select value={v.englishVariant} onChange={set('englishVariant')} disabled={disabled}>
-          <option value="">Select one...</option>
+        <label className="fc-label">English variant <span className="fc-req">*</span></label>
+        <select value={v.englishVariant} onChange={set('englishVariant')} disabled={disabled} required>
+          <option value="">Select one…</option>
           <option value="New Zealand English">New Zealand English</option>
           <option value="Australian English">Australian English</option>
         </select>
       </div>
-      <button className="fc-next-btn" onClick={() => onSubmit(v)} disabled={disabled}>Next</button>
+      {err && <p className="fc-err">{err}</p>}
+      <button className="fc-next-btn" onClick={submit} disabled={disabled}>Next</button>
     </div>
   );
 }
@@ -148,7 +157,6 @@ function FileStep({ stepDef, index, total, onAccept, onSkip, disabled }) {
 
   return (
     <div className="fc-form">
-      <p className="fc-file-counter">{index + 1} of {total}</p>
       <input ref={inputRef} type="file" style={{ display: 'none' }}
         onChange={e => { if (e.target.files?.[0]) accept(e.target.files[0].name); e.target.value = ''; }} />
       <div
@@ -163,8 +171,9 @@ function FileStep({ stepDef, index, total, onAccept, onSkip, disabled }) {
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <div>
-          <div className="fc-drop-label">Drag & drop or click to upload</div>
+        <div className="fc-drop-text">
+          <span className="fc-drop-label">Drag & drop or click to upload</span>
+          <span className="fc-drop-sub">{index + 1} of {total}</span>
         </div>
       </div>
       {chosen && (
@@ -198,7 +207,7 @@ function ResultBox({ text }) {
           : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         }
       </button>
-      <pre className="fc-result-text">{text}</pre>
+      <div className="fc-result-text">{text}</div>
     </div>
   );
 }
@@ -343,7 +352,7 @@ export default function FormChat() {
   const handleIntroSelect = choice => {
     setLocked(m => m.tag === 'intro');
     if (choice === 'Bid Writing') {
-      pushText("Let's start with the bid's main details.", () => push({ type: 'form1' }));
+      pushText("Ok, sure. Let's start with the bid's main details.", () => push({ type: 'form1' }));
     } else {
       pushText("Thanks for stopping by. We'll have more options available soon. 👋🏾", () =>
         push({ type: 'ended' })
