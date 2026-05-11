@@ -347,6 +347,23 @@
   color: #374151;
 }
 
+.msg-wand-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.msg-wand-btn:hover,
+.msg-wand-btn.active {
+  color: #7c3aed;
+}
+
 /* ── Form chat (Bid Writing Prompt) ───────────────────────────────── */
 
 /* Typing cursor on bot text */

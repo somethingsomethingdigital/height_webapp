@@ -34,6 +34,25 @@ function renderMarkdown(text) {
     .replace(/\n/g, '<br/>');
 }
 
+function WandButton({ text, onSend }) {
+  const [active, setActive] = useState(false);
+  const handle = () => {
+    if (active) return;
+    setActive(true);
+    onSend(`Please rewrite the following response in the style of Shakespearean English (ye olde English):\n\n${text}`);
+    setTimeout(() => setActive(false), 1800);
+  };
+  return (
+    <button className={`msg-wand-btn${active ? ' active' : ''}`} onClick={handle} title="Rewrite in Shakespearean English">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/>
+        <path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/>
+        <path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>
+      </svg>
+    </button>
+  );
+}
+
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -52,7 +71,7 @@ function CopyButton({ text }) {
   );
 }
 
-function Message({ msg }) {
+function Message({ msg, onWand }) {
   if (msg.role === 'assistant') {
     return (
       <div className="message assistant">
@@ -63,6 +82,7 @@ function Message({ msg }) {
           {msg.content && (
             <div className="msg-actions">
               <CopyButton text={msg.content} />
+              <WandButton text={msg.content} onSend={onWand} />
             </div>
           )}
         </div>
@@ -130,6 +150,53 @@ export default function AIChat({ token, onUnauthorized }) {
 
   const removeAttachment = (index) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const sendProgrammatic = async (text) => {
+    if (loading) return;
+    const userMsg = { role: 'user', content: text };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setLoading(true);
+    const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ messages: apiMessages, system: SYSTEM_PROMPT }),
+      });
+      if (res.status === 401) { onUnauthorized(); return; }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantText = '';
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const lines = decoder.decode(value).split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.text) {
+              assistantText += parsed.text;
+              setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: 'assistant', content: assistantText };
+                return updated;
+              });
+            }
+          } catch {}
+        }
+      }
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
+    } finally {
+      setLoading(false);
+      inputRef.current?.focus();
+    }
   };
 
   const sendMessage = async () => {
@@ -237,7 +304,7 @@ export default function AIChat({ token, onUnauthorized }) {
           </div>
         )}
         {messages.map((msg, i) => (
-          <Message key={i} msg={msg} />
+          <Message key={i} msg={msg} onWand={sendProgrammatic} />
         ))}
         {loading && (
           <div className="message assistant">
