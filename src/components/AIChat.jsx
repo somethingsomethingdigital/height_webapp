@@ -270,6 +270,9 @@ export default function AIChat({ token, onUnauthorized }) {
         </div>
         <p className="input-hint">Height AI can make mistakes. Consider checking important information.</p>
       </div>
+      <div className="fc-powered-footer">
+        <span>Powered by <a href="https://www.somethingsomething.digital" target="_blank" rel="noopener">Something Something Digital</a></span>
+      </div>
     </div>
   );
 }
