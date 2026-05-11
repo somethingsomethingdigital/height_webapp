@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import './FormCard.css';
+import './Chat.css';
 
 const WEBHOOK_URL = 'https://hook.us1.make.com/431zm5huyqdtadg15wpiw5hmuyw5csiu';
 const TYPING_SPEED = 15;
@@ -12,42 +12,6 @@ const FILE_STEPS = [
   { key: 'win_themes',    label: 'Upload the win themes file' },
   { key: 'style_guide',   label: 'Upload the writing style guide, if available' },
 ];
-
-// ── Shared pieces ─────────────────────────────────────────────────────────────
-
-function RobotIcon({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <line x1="32" y1="6" x2="32" y2="14" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="32" cy="5" r="3" fill="white"/>
-      <rect x="14" y="14" width="36" height="26" rx="7" fill="white"/>
-      <circle cx="24" cy="25" r="4" fill="#499281"/>
-      <circle cx="40" cy="25" r="4" fill="#499281"/>
-      <circle cx="25.5" cy="23.5" r="1.2" fill="white"/>
-      <circle cx="41.5" cy="23.5" r="1.2" fill="white"/>
-      <path d="M24 33 Q32 38 40 33" stroke="#499281" strokeWidth="2" strokeLinecap="round" fill="none"/>
-      <rect x="9" y="20" width="5" height="10" rx="2.5" fill="white"/>
-      <rect x="50" y="20" width="5" height="10" rx="2.5" fill="white"/>
-    </svg>
-  );
-}
-
-function BotRow({ children }) {
-  return (
-    <div className="fc-row">
-      <div className="fc-avatar"><RobotIcon size={18} /></div>
-      <div className="fc-body">{children}</div>
-    </div>
-  );
-}
-
-function FormRow({ children }) {
-  return (
-    <div className="fc-form-row">
-      {children}
-    </div>
-  );
-}
 
 function TypeBubble({ text }) {
   const [shown, setShown] = useState('');
@@ -63,28 +27,8 @@ function TypeBubble({ text }) {
     }, TYPING_SPEED);
     return () => clearInterval(iv);
   }, [text]);
-  return <p className={`fc-bubble${done ? '' : ' fc-typing'}`}>{shown}</p>;
+  return <span className={done ? '' : 'fc-typing'}>{shown}</span>;
 }
-
-function TypingDots() {
-  return (
-    <div className="fc-dots">
-      <span/><span/><span/>
-    </div>
-  );
-}
-
-function OptionBtns({ options, onSelect, disabled }) {
-  return (
-    <div className="fc-opts">
-      {options.map(o => (
-        <button key={o} className="fc-opt-btn" disabled={disabled} onClick={() => onSelect(o)}>{o}</button>
-      ))}
-    </div>
-  );
-}
-
-// ── Form steps ────────────────────────────────────────────────────────────────
 
 function Form1({ onSubmit, disabled }) {
   const [v, setV] = useState({ ourClient: '', theirClient: '', projectTitle: '' });
@@ -98,7 +42,7 @@ function Form1({ onSubmit, disabled }) {
     onSubmit(v);
   };
   return (
-    <div className="fc-form">
+    <>
       <div className="fc-field">
         <label className="fc-label">Our client name <span className="fc-req">*</span></label>
         <input type="text" value={v.ourClient} onChange={set('ourClient')} disabled={disabled} autoComplete="off" />
@@ -113,7 +57,7 @@ function Form1({ onSubmit, disabled }) {
       </div>
       {err && <p className="fc-err">{err}</p>}
       <button className="fc-next-btn" onClick={submit} disabled={disabled}>Next</button>
-    </div>
+    </>
   );
 }
 
@@ -126,10 +70,10 @@ function Form2({ onSubmit, disabled }) {
     onSubmit(v);
   };
   return (
-    <div className="fc-form">
+    <>
       <div className="fc-field">
         <label className="fc-label">What have you been tasked to support?</label>
-        <span className="fc-hint">e.g., Executive Summary, Case Studies. If drafting RE / TR / CVs only, specify those sections.</span>
+        <span className="fc-hint">e.g., Executive Summary, Case Studies.</span>
         <textarea value={v.nonPrice} onChange={set('nonPrice')} disabled={disabled} />
       </div>
       <div className="fc-field">
@@ -152,19 +96,17 @@ function Form2({ onSubmit, disabled }) {
       </div>
       {err && <p className="fc-err">{err}</p>}
       <button className="fc-next-btn" onClick={submit} disabled={disabled}>Next</button>
-    </div>
+    </>
   );
 }
 
-function FileStep({ stepDef, index, total, onAccept, onSkip, disabled }) {
+function FileStep({ index, total, onAccept, onSkip, disabled }) {
   const [chosen, setChosen] = useState(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);
-
   const accept = name => { setChosen(name); onAccept(name); };
-
   return (
-    <div className="fc-form">
+    <>
       <input ref={inputRef} type="file" style={{ display: 'none' }}
         onChange={e => { if (e.target.files?.[0]) accept(e.target.files[0].name); e.target.value = ''; }} />
       <div
@@ -195,7 +137,7 @@ function FileStep({ stepDef, index, total, onAccept, onSkip, disabled }) {
       {!chosen && !disabled && (
         <button className="fc-skip-btn" onClick={onSkip}>Skip</button>
       )}
-    </div>
+    </>
   );
 }
 
@@ -220,20 +162,15 @@ function ResultBox({ text }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
 export default function FormChat() {
   const [messages, setMessages] = useState([]);
   const bottomRef = useRef(null);
 
-  // Mutable refs — safe to read from stale closures inside timeouts
-  const mounted   = useRef(true);
-  const idRef     = useRef(0);
-  const formData  = useRef({});
-  const files     = useRef({});
-  const fileStep  = useRef(0);
-
-  // Forward refs for functions referenced before they're defined
+  const mounted        = useRef(true);
+  const idRef          = useRef(0);
+  const formData       = useRef({});
+  const files          = useRef({});
+  const fileStep       = useRef(0);
   const pushFileStepFn = useRef(null);
   const startFlowFn    = useRef(null);
 
@@ -242,8 +179,6 @@ export default function FormChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // ── Core helpers ────────────────────────────────────────────────────────────
 
   const push = msg => {
     if (!mounted.current) return;
@@ -257,8 +192,6 @@ export default function FormChat() {
     push({ type: 'text', text });
     if (then) setTimeout(() => { if (mounted.current) then(); }, tyDelay(text));
   };
-
-  // ── File upload flow ────────────────────────────────────────────────────────
 
   const pushFileStep = idx => {
     if (idx >= FILE_STEPS.length) {
@@ -277,16 +210,14 @@ export default function FormChat() {
     setTimeout(() => { if (mounted.current) pushFileStepFn.current(next); }, 450);
   };
 
-  const handleFileAccept = (key, name) => { files.current[key] = name;  advanceFile(key); };
-  const handleFileSkip   = key          => { files.current[key] = '';    advanceFile(key); };
-
-  // ── Form submit handlers ────────────────────────────────────────────────────
+  const handleFileAccept = (key, name) => { files.current[key] = name; advanceFile(key); };
+  const handleFileSkip   = key          => { files.current[key] = '';   advanceFile(key); };
 
   const handleForm1Submit = v => {
     formData.current = {
-      our_client_name:  v.ourClient,
+      our_client_name:   v.ourClient,
       their_client_name: v.theirClient,
-      project_title:    v.projectTitle,
+      project_title:     v.projectTitle,
     };
     setLocked(m => m.type === 'form1');
     pushText("Great. Now let's add the response focus.", () => push({ type: 'form2' }));
@@ -295,10 +226,10 @@ export default function FormChat() {
   const handleForm2Submit = v => {
     formData.current = {
       ...formData.current,
-      non_price_attributes:    v.nonPrice,
+      non_price_attributes:     v.nonPrice,
       subject_matter_expertise: v.sme,
-      evaluation_criteria:     v.evalCriteria,
-      english_variant:         v.englishVariant,
+      evaluation_criteria:      v.evalCriteria,
+      english_variant:          v.englishVariant,
     };
     setLocked(m => m.type === 'form2');
     fileStep.current = 0;
@@ -307,8 +238,6 @@ export default function FormChat() {
       () => pushFileStepFn.current(0)
     );
   };
-
-  // ── Webhook submit ──────────────────────────────────────────────────────────
 
   const handleSubmit = () => {
     setLocked(m => m.type === 'submit-btn');
@@ -346,8 +275,6 @@ export default function FormChat() {
         push({ type: 'text', text: 'Something went wrong. Please try again.' });
       });
   };
-
-  // ── Conversation flow ───────────────────────────────────────────────────────
 
   const startFlow = () => {
     pushText(
@@ -387,60 +314,78 @@ export default function FormChat() {
 
   useEffect(() => { setTimeout(() => startFlowFn.current(), 500); }, []);
 
-  // ── Render messages ─────────────────────────────────────────────────────────
+  const BotMsg = ({ children }) => (
+    <div className="message assistant">
+      <div className="message-bubble">{children}</div>
+    </div>
+  );
+
+  const CardMsg = ({ children }) => (
+    <div className="message assistant">
+      <div className="fc-form-card">{children}</div>
+    </div>
+  );
 
   const renderMsg = msg => {
     switch (msg.type) {
       case 'text':
-        return <BotRow key={msg.id}><TypeBubble text={msg.text} /></BotRow>;
+        return <BotMsg key={msg.id}><TypeBubble text={msg.text} /></BotMsg>;
 
       case 'opts':
         return (
-          <BotRow key={msg.id}>
-            <OptionBtns
-              options={msg.options}
-              disabled={msg.locked}
-              onSelect={msg.tag === 'intro' ? handleIntroSelect : handleRestartSelect}
-            />
-          </BotRow>
+          <BotMsg key={msg.id}>
+            <div className="fc-opts">
+              {msg.options.map(o => (
+                <button key={o} className="fc-opt-btn" disabled={msg.locked}
+                  onClick={() => msg.tag === 'intro' ? handleIntroSelect(o) : handleRestartSelect(o)}>
+                  {o}
+                </button>
+              ))}
+            </div>
+          </BotMsg>
         );
 
       case 'form1':
-        return <FormRow key={msg.id}><Form1 onSubmit={handleForm1Submit} disabled={msg.locked} /></FormRow>;
+        return <CardMsg key={msg.id}><Form1 onSubmit={handleForm1Submit} disabled={msg.locked} /></CardMsg>;
 
       case 'form2':
-        return <FormRow key={msg.id}><Form2 onSubmit={handleForm2Submit} disabled={msg.locked} /></FormRow>;
+        return <CardMsg key={msg.id}><Form2 onSubmit={handleForm2Submit} disabled={msg.locked} /></CardMsg>;
 
       case 'file':
         return (
-          <FormRow key={msg.id}>
+          <CardMsg key={msg.id}>
             <FileStep
-              stepDef={FILE_STEPS[msg.idx]}
               index={msg.idx}
               total={FILE_STEPS.length}
               onAccept={name => handleFileAccept(msg.key, name)}
               onSkip={() => handleFileSkip(msg.key)}
               disabled={msg.locked}
             />
-          </FormRow>
+          </CardMsg>
         );
 
       case 'submit-btn':
         return (
-          <FormRow key={msg.id}>
+          <BotMsg key={msg.id}>
             <button className="fc-next-btn" onClick={handleSubmit} disabled={msg.locked}>Submit</button>
-          </FormRow>
+          </BotMsg>
         );
 
       case 'waiting':
-        return <BotRow key={msg.id}><TypingDots /></BotRow>;
+        return (
+          <div key={msg.id} className="message assistant">
+            <div className="message-bubble typing-bubble">
+              <span /><span /><span />
+            </div>
+          </div>
+        );
 
       case 'result':
         return (
-          <FormRow key={msg.id}>
-            <p className="fc-bubble" style={{ marginBottom: '0.5rem' }}>Here's your standard prompt</p>
+          <CardMsg key={msg.id}>
+            <p className="fc-result-intro">Here's your standard prompt</p>
             <ResultBox text={msg.text} />
-          </FormRow>
+          </CardMsg>
         );
 
       case 'ended':
@@ -452,63 +397,21 @@ export default function FormChat() {
   };
 
   return (
-    <div className="fc-page">
-    <div className="fc-card">
-
-      <header className="fc-header">
-        <div className="fc-logo-wrap">
-          <img
-            src="https://raw.githubusercontent.com/somethingsomethingdigital/height-assistant/2064114894df8b84591dacdf228a2900d8885c71/height_logo.png"
-            alt="Height"
-          />
+    <div className="chat-container">
+      {messages.length > 0 && (
+        <div className="chat-topbar">
+          <button className="reset-btn" onClick={reset}>Restart</button>
         </div>
-        <button className="fc-restart-btn" onClick={reset} title="Restart">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
-            strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-          </svg>
-        </button>
-      </header>
+      )}
 
-      <div className="fc-scroll">
-        <div className="fc-hero">
-          <div className="fc-hero-icon">
-            <svg viewBox="0 0 64 64" fill="none" width="42" height="42">
-              <line x1="32" y1="6" x2="32" y2="14" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="32" cy="5" r="2.5" fill="white"/>
-              <rect x="14" y="14" width="36" height="26" rx="7" fill="white"/>
-              <circle cx="24" cy="25" r="4" fill="#499281"/>
-              <circle cx="40" cy="25" r="4" fill="#499281"/>
-              <circle cx="25.5" cy="23.5" r="1.2" fill="white"/>
-              <circle cx="41.5" cy="23.5" r="1.2" fill="white"/>
-              <path d="M24 33 Q32 38 40 33" stroke="#499281" strokeWidth="2" strokeLinecap="round" fill="none"/>
-              <rect x="9" y="20" width="5" height="10" rx="2.5" fill="white"/>
-              <rect x="50" y="20" width="5" height="10" rx="2.5" fill="white"/>
-              <rect x="20" y="42" width="24" height="16" rx="5" fill="white" opacity="0.85"/>
-              <circle cx="27" cy="50" r="2.5" fill="#499281" opacity="0.5"/>
-              <circle cx="37" cy="50" r="2.5" fill="#499281" opacity="0.5"/>
-            </svg>
-          </div>
-          <span className="fc-hero-title">Height AI Assistant</span>
-          <span className="fc-hero-subtitle">
-            Provide information about your bid to receive a standard AI prompt for use in ChatGPT projects.
-          </span>
-        </div>
-
-        <div className="fc-messages">
-          {messages.map(renderMsg)}
-          <div ref={bottomRef} />
-        </div>
+      <div className="messages">
+        {messages.map(renderMsg)}
+        <div ref={bottomRef} />
       </div>
 
-      <footer className="fc-footer">
-        <span className="fc-powered">
-          Powered by <a href="https://www.somethingsomething.digital" target="_blank" rel="noopener">Something Something Digital</a>
-        </span>
-      </footer>
-
-    </div>
+      <div className="fc-powered-footer">
+        <span>Powered by <a href="https://www.somethingsomething.digital" target="_blank" rel="noopener">Something Something Digital</a></span>
+      </div>
     </div>
   );
 }
