@@ -321,26 +321,30 @@
 .msg-actions {
   display: flex;
   gap: 4px;
-  margin-top: 4px;
+  margin-top: 6px;
   padding: 0 2px;
+  justify-content: flex-start;
 }
 
 .msg-copy-btn {
-  background: none;
-  border: none;
-  color: #c2c2c8;
+  background: #f4f4f4;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
   cursor: pointer;
-  padding: 3px;
-  border-radius: 4px;
+  padding: 5px 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: color 0.15s, background 0.15s;
+  gap: 5px;
+  font-size: 12px;
+  font-family: inherit;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .msg-copy-btn:hover {
-  color: #6b7280;
-  background: #f4f4f4;
+  background: #ececec;
+  border-color: #d1d5db;
+  color: #374151;
 }
 
 /* ── Form chat (Bid Writing Prompt) ───────────────────────────────── */
