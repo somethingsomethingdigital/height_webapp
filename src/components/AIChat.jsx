@@ -45,9 +45,8 @@ function WandButton({ text, onSend }) {
   return (
     <button className={`msg-wand-btn${active ? ' active' : ''}`} onClick={handle} title="Rewrite in Shakespearean English">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/>
-        <path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/>
-        <path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
       </svg>
     </button>
   );
@@ -369,7 +368,7 @@ export default function AIChat({ token, onUnauthorized }) {
             ↑
           </button>
         </div>
-        <p className="input-hint">AI can make mistakes. Checking important information.</p>
+        <p className="input-hint">AI can make mistakes. Check important information.</p>
       </div>
       <div className="fc-powered-footer">
         <span>Powered by <a href="https://www.somethingsomething.digital" target="_blank" rel="noopener">Something Something Digital</a></span>
