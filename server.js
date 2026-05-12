@@ -29,10 +29,18 @@ function requireAuth(req, res, next) {
   next();
 }
 
+app.get('/api/health', (req, res) => {
+  res.json({
+    username_var_set: !!process.env.AUTH_USERNAME,
+    password_var_set: !!process.env.AUTH_PASSWORD,
+    node_env: process.env.NODE_ENV || 'not set',
+  });
+});
+
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   if (
-    username !== process.env.AUTH_USERNAME ||
+    username?.trim() !== process.env.AUTH_USERNAME?.trim() ||
     password !== process.env.AUTH_PASSWORD
   ) {
     return res.status(401).json({ error: 'Invalid username or password' });
